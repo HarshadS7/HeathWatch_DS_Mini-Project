@@ -1,9 +1,10 @@
-import { Suspense, useRef, type ReactNode } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Billboard, Environment, Lightformer, OrbitControls, RoundedBox, Text } from '@react-three/drei'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
+import { Environment, Html, Lightformer, OrbitControls, RoundedBox } from '@react-three/drei'
 import type { Group, Mesh } from 'three'
-import FONT_REG from '@fontsource/inter/files/inter-latin-500-normal.woff?url'
-import FONT_BOLD from '@fontsource/inter/files/inter-latin-700-normal.woff?url'
+import { easing } from 'maath'
+import { mix } from '../../../lib/bands'
+import { useLabView } from '../player'
 
 /* ----------------------------------------------------------------------------
    "Cosy diorama" kit — soft pastel, rounded, matte, toy-like.
@@ -159,7 +160,7 @@ export function WeatherMast({ position, spin = true }: { position: [number, numb
   )
 }
 
-/** Billboard label: always faces camera, rounded "tag" background. */
+/** Label pinned to a 3D point, drawn as a DOM pill (always crisp and legible, no font download). */
 export function Tag({
   text,
   position,
@@ -175,20 +176,24 @@ export function Tag({
   size?: number
   bold?: boolean
 }) {
-  const w = Math.max(0.5, text.length * size * 0.56 + size * 0.9)
   return (
-    <Billboard position={position}>
-      {bg && (
-        <RoundedBox args={[w, size * 1.75, 0.04]} radius={size * 0.6} smoothness={4} position={[0, 0, -0.03]}>
-          <meshBasicMaterial color={bg} transparent opacity={0.92} />
-        </RoundedBox>
-      )}
-      <Suspense fallback={null}>
-        <Text font={bold ? FONT_BOLD : FONT_REG} fontSize={size} color={color} anchorX="center" anchorY="middle">
-          {text}
-        </Text>
-      </Suspense>
-    </Billboard>
+    <Html position={position} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+      <span
+        style={{
+          display: 'inline-block',
+          whiteSpace: 'nowrap',
+          font: `${bold ? 700 : 500} ${Math.round(Math.max(10, size * 78))}px "Inter Variable", system-ui, sans-serif`,
+          color,
+          background: bg ?? 'transparent',
+          padding: bg ? '2px 8px' : 0,
+          borderRadius: 999,
+          boxShadow: bg ? '0 2px 8px rgba(60, 45, 30, 0.12)' : 'none',
+          textShadow: bg ? 'none' : '0 1px 0 rgba(255,255,255,0.7)',
+        }}
+      >
+        {text}
+      </span>
+    </Html>
   )
 }
 
@@ -221,9 +226,9 @@ export function DollhouseControls() {
   return (
     <OrbitControls
       makeDefault
-      enablePan={false}
-      minZoom={30}
-      maxZoom={110}
+      enablePan
+      screenSpacePanning
+      enableZoom={false} // plain wheel steps through the trace; zoom is ctrl/pinch/buttons (see ZoomSync)
       minPolarAngle={Math.PI * 0.18}
       maxPolarAngle={Math.PI * 0.38}
       minAzimuthAngle={-Math.PI * 0.12}
@@ -254,4 +259,67 @@ export function Cloud({ position, speed = 0.15 }: { position: [number, number, n
       </mesh>
     </mesh>
   )
+}
+
+/** Group that eases toward `to` every frame (snaps under reduced motion). Key children by stable ids. */
+export function Eased({ to, children, reduced, from }: { to: [number, number, number]; children: ReactNode; reduced?: boolean; from?: [number, number, number] }) {
+  const g = useRef<Group>(null)
+  const init = useRef(false)
+  useFrame((_, dt) => {
+    if (!g.current) return
+    if (!init.current) {
+      g.current.position.set(...(from ?? to))
+      init.current = true
+    }
+    if (reduced) g.current.position.set(...to)
+    else easing.damp3(g.current.position, to, 0.2, dt)
+  })
+  return <group ref={g}>{children}</group>
+}
+
+/** Flat arrow on/above the floor from a to b (shaft + cone head). */
+export function Arrow3D({ from, to, color = PAL.ink, y = 0.3, thick = 0.035 }: { from: [number, number]; to: [number, number]; color?: string; y?: number; thick?: number }) {
+  const dx = to[0] - from[0]
+  const dz = to[1] - from[1]
+  const len = Math.hypot(dx, dz)
+  if (len < 0.01) return null
+  const ang = Math.atan2(dx, dz)
+  return (
+    <group position={[from[0], y, from[1]]} rotation={[0, ang, 0]}>
+      <mesh position={[0, 0, (len - 0.18) / 2]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[thick, thick, len - 0.18, 10]} />
+        <Matte color={color} />
+      </mesh>
+      <mesh position={[0, 0, len - 0.12]} rotation={[Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[thick * 3.2, 0.2, 14]} />
+        <Matte color={color} />
+      </mesh>
+    </group>
+  )
+}
+
+/** Soft pastel heat ramp for the dioramas (cream → peach → coral → brick), 25–47 °C. Exact values are always on the labels. */
+const SOFT = ['#fdf0d5', '#f9d9a9', '#f6b98a', '#ef8f6b', '#e06a4c', '#c4482f']
+export function softHeat(t: number) {
+  const x = Math.min(1, Math.max(0, (t - 25) / 22)) * (SOFT.length - 1)
+  const i = Math.min(SOFT.length - 2, Math.floor(x))
+  return mix(SOFT[i], SOFT[i + 1], x - i)
+}
+
+/** Applies the Lab zoom factor to the orthographic camera smoothly; a reset also restores pan/rotation. */
+export function ZoomSync({ base }: { base: number }) {
+  const camera = useThree((s) => s.camera)
+  const controls = useThree((s) => s.controls) as unknown as { reset?: () => void } | null
+  const zoom = useLabView((s) => s.zoom)
+  const resets = useLabView((s) => s.resets)
+  useEffect(() => {
+    if (resets) controls?.reset?.()
+  }, [resets, controls])
+  useFrame((_, dt) => {
+    const target = base * zoom
+    if (Math.abs(camera.zoom - target) < 0.05) return
+    camera.zoom += (target - camera.zoom) * (1 - Math.exp(-dt * 10))
+    camera.updateProjectionMatrix()
+  })
+  return null
 }

@@ -4,7 +4,19 @@ import { api } from '../../lib/api'
 import { useUi } from '../../lib/store'
 import { Card, PageHeader, Segmented, Skeleton } from '../../components/ui'
 import { AlertsFeed } from '../dashboard/AlertsFeed'
-import { IndiaMap } from '../dashboard/IndiaMap'
+import { IndiaMap as IndiaMapSvg } from '../dashboard/IndiaMap'
+import { lazy, Suspense } from 'react'
+const IndiaMap3D = lazy(() => import('../dashboard/IndiaMap3D'))
+const WEBGL = (() => { try { return !!document.createElement('canvas').getContext('webgl2') } catch { return false } })()
+function IndiaMap(p: React.ComponentProps<typeof IndiaMapSvg>) {
+  return WEBGL ? (
+    <Suspense fallback={<div className={p.className} />}>
+      <IndiaMap3D {...p} />
+    </Suspense>
+  ) : (
+    <IndiaMapSvg {...p} />
+  )
+}
 
 export default function AlertsPage() {
   const qc = useQueryClient()
@@ -48,7 +60,7 @@ export default function AlertsPage() {
         >
           {stations.data ? (
             <IndiaMap
-              className="h-[540px] px-2 pb-2"
+              className="aspect-[56/52] w-full"
               stations={stations.data}
               selected={stationId}
               hover={hoverStation}

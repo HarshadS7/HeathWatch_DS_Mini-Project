@@ -1,0 +1,143 @@
+{
+ "version": "linreg-1",
+ "features": [
+  "t0",
+  "t1",
+  "t2",
+  "t3",
+  "mean7",
+  "doy_sin",
+  "doy_cos"
+ ],
+ "mean": [
+  32.358516,
+  32.358019,
+  32.357346,
+  32.356574,
+  32.356366,
+  -0.000161,
+  -0.002394
+ ],
+ "std": [
+  4.93859,
+  4.939141,
+  4.939883,
+  4.940893,
+  4.775356,
+  0.707945,
+  0.706263
+ ],
+ "coef": [
+  4.779475,
+  -1.045077,
+  0.035826,
+  -0.143104,
+  1.081993,
+  0.12083,
+  -0.081808
+ ],
+ "intercept": 32.358669,
+ "evaluation": {
+  "target": "next-day maximum temperature (°C)",
+  "split": {
+   "train": "2015–2022",
+   "validation": "2023",
+   "test": "2024–2025"
+  },
+  "samples": {
+   "train": 46640,
+   "validation": 5840,
+   "test": 11696
+  },
+  "validation": {
+   "model": 0.862,
+   "persistence": 0.873
+  },
+  "test": {
+   "model": 0.893,
+   "persistence": 0.91
+  },
+  "perStation": {
+   "AMD": {
+    "n": 731,
+    "model": 0.807,
+    "persistence": 0.828
+   },
+   "BBI": {
+    "n": 731,
+    "model": 0.887,
+    "persistence": 0.91
+   },
+   "BHO": {
+    "n": 731,
+    "model": 0.918,
+    "persistence": 0.935
+   },
+   "BLR": {
+    "n": 731,
+    "model": 0.676,
+    "persistence": 0.679
+   },
+   "BOM": {
+    "n": 731,
+    "model": 0.648,
+    "persistence": 0.663
+   },
+   "CCU": {
+    "n": 731,
+    "model": 0.906,
+    "persistence": 0.942
+   },
+   "DEL": {
+    "n": 731,
+    "model": 1.151,
+    "persistence": 1.159
+   },
+   "HYD": {
+    "n": 731,
+    "model": 0.833,
+    "persistence": 0.844
+   },
+   "JAI": {
+    "n": 731,
+    "model": 1.046,
+    "persistence": 1.065
+   },
+   "JDH": {
+    "n": 731,
+    "model": 0.972,
+    "persistence": 0.996
+   },
+   "LKO": {
+    "n": 731,
+    "model": 1.056,
+    "persistence": 1.059
+   },
+   "MAA": {
+    "n": 731,
+    "model": 0.765,
+    "persistence": 0.785
+   },
+   "NAG": {
+    "n": 731,
+    "model": 0.88,
+    "persistence": 0.897
+   },
+   "PAT": {
+    "n": 731,
+    "model": 1.073,
+    "persistence": 1.105
+   },
+   "PNQ": {
+    "n": 731,
+    "model": 0.615,
+    "persistence": 0.622
+   },
+   "PRY": {
+    "n": 731,
+    "model": 1.062,
+    "persistence": 1.065
+   }
+  }
+ }
+}

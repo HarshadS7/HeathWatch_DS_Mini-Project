@@ -8,6 +8,7 @@
  * shows that label. Switch to the real backend with VITE_USE_MOCK=false.
  */
 import sample from './sample.json'
+import fixtures from './fixtures.json'
 import { bandFor } from '../bands'
 import { haversineKm } from '../format'
 import type {
@@ -307,6 +308,15 @@ export const mockApi = {
     return delay({ ok: true }, 40)
   },
 
+  async historyRange(station: string, from: string, to: string) {
+    const rows = (history.get(station) ?? []).filter((o) => o.observedAt >= from && o.observedAt <= to).map((o) => ({ id: String(o.id), date: o.observedAt, temperatureC: o.temperatureC }))
+    return delay({ rows, visited: 0, comparisons: 0, height: 0, size: history.get(station)?.length ?? 0, engineTimeMs: 0, source: 'mock' as const })
+  },
+  async sortReadings(rows: Observation[]) {
+    return delay({ rows: [...rows].sort((a, b) => a.temperatureC - b.temperatureC || a.id - b.id), comparisons: 0, engineTimeMs: 0 })
+  },
+  labTrace: (op: string, payload: unknown) => mockLabTrace(op, payload as Record<string, unknown>),
+
   /** Current live queue snapshot (for the Lab's "use live data" mode). */
   async queueState(): Promise<QueueState> {
     return delay(q, 40)
@@ -392,4 +402,13 @@ export const mockApi = {
   },
 }
 
-export type MockApi = typeof mockApi
+const FIX = fixtures as unknown as Record<string, Trace>
+
+/** Without the WASM build, Lab operations replay traces recorded from the native C++ engine (default inputs). */
+export async function mockLabTrace(op: string, payload: Record<string, unknown>): Promise<Trace> {
+  const key = op === 'bst.demo' ? `${op}:${payload.order}` : op === 'graph.components' ? `${op}:${payload.algorithm}` : op
+  const t = FIX[key]
+  if (!t) throw new Error(`No recorded trace for ${key}; build the WASM engine (engine/build.sh).`)
+  return delay(t, 60)
+}
+export const fixtureMeta = (fixtures as unknown as { _meta: { hashKey: string; hot: string[] } })._meta

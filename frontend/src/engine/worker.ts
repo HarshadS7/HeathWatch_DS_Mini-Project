@@ -11,6 +11,7 @@ const ready = (async () => {
   const mod = await factory()
   handle = (req: string) => mod.ccall('hw_handle', 'string', ['string'], [req])
 })()
+ready.catch(() => {}) // reported per request below
 
 self.onmessage = async (e: MessageEvent<string>) => {
   try {

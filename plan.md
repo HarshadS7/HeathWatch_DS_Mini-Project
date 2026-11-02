@@ -337,3 +337,18 @@ Finish on `/model` (honest baseline comparison) and backend restart showing inde
 - IMD heatwave criteria — https://mausam.imd.gov.in
 
 _A deeper research appendix (design references, versions, trace-playback patterns) will be added in `reports/` when the background research completes._
+
+---
+
+## 12. Status (2026-11-02)
+
+Done:
+- Data: `data/prepare.py` (16 IMD grid cells, 64,288 daily readings), mock sample + normals.
+- Engine (C++17): all 8 structures + traces for queue, list, BST (live + demo), hash, graph BFS/DFS, merge sort, binary search, stack formula; 92 native tests pass.
+- Frontend: dashboard (raised colour-coded state map with hover pop), station, history (engine BST range + merge sort), alerts & hot regions, model, about; Structure Lab with all 7 scroll-controlled 3D dioramas.
+- Static architecture: Web Worker engine client, IndexedDB persistence + index rebuild, Vercel config.
+- ML: `ml/train.py` → `model.json` (test MAE 0.893 vs persistence 0.910).
+
+Remaining for the user:
+- Install Emscripten and run `engine/build.sh` to produce `frontend/public/engine/heatwatch.{js,wasm}` (until then the app uses the labelled mock + recorded traces).
+- Screenshots / demo recording / report.

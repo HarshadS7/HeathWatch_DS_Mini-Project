@@ -316,4 +316,28 @@ export const engineApi = {
     const r = await call('queue.demo', { ...opts, items }, true)
     return toTrace<QueueState>('queue', 'scenario', r)
   },
+  /** History search on the station's live BST index (engine), with operation counters. */
+  async historyRange(station: string, from: string, to: string) {
+    await ready
+    const r = await call<{ rows: { id: string; date: string; temperatureC: number }[]; visited: number; comparisons: number; height: number; size: number }>('bst.range', {
+      station,
+      from: dateInt(from),
+      to: dateInt(to),
+    })
+    return { ...r.result, engineTimeMs: r.engineTimeMs ?? 0, source: 'engine' as const }
+  },
+  /** Merge sort (engine) of a snapshot by temperature; stable with id tie-break. */
+  async sortReadings(rows: Observation[]) {
+    const r = await call<{ sorted: { id: number }[]; comparisons: number; writes: number }>('sort.merge', {
+      key: 't',
+      values: rows.map((o) => ({ id: o.id, date: dateInt(o.observedAt), t: o.temperatureC })),
+    })
+    const byId = new Map(rows.map((o) => [o.id, o]))
+    return { rows: r.result.sorted.map((x) => byId.get(x.id)!), comparisons: r.result.comparisons, engineTimeMs: r.engineTimeMs ?? 0 }
+  },
+  /** Any traced Lab operation on the engine (list.demo, bst.demo, hash.lookup, graph.components, sort.merge, search.binary, stack.eval). */
+  async labTrace(op: string, payload: unknown, structure: Trace['structure']): Promise<Trace> {
+    await ready
+    return toTrace(structure, op, await call(op, payload, true))
+  },
 }

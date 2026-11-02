@@ -121,7 +121,7 @@ export interface Trace<S = unknown> {
   op: string
   engineTimeMs: number
   truncated: boolean
-  source: 'engine' | 'mock'
+  source: 'engine' | 'mock' | 'recorded'
   steps: TraceStep<S>[]
   result?: unknown
 }

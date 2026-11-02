@@ -3,9 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import { easing } from 'maath'
 import { Color, type Group, type MeshStandardMaterial } from 'three'
-import { tempColor } from '../../../lib/bands'
 import type { QueueSlot, QueueState, TraceStep } from '../../../lib/types'
-import { Cloud, Island, Matte, PAL, PointerFlag, Tag, Tree, WeatherMast } from '../three/Diorama'
+import { Cloud, Island, Matte, PAL, PointerFlag, Tag, Tree, WeatherMast, softHeat } from '../three/Diorama'
 
 /*
   Circular queue as a carousel of rounded slot pads on a floating island.
@@ -60,7 +59,7 @@ function Crate({ p, reduced }: { p: Placed; reduced: boolean }) {
   const g = useRef<Group>(null)
   const mat = useRef<MeshStandardMaterial>(null)
   const invalidate = useThree((s) => s.invalidate)
-  const base = useMemo(() => new Color(tempColor(p.item.temperatureC)), [p.item.temperatureC])
+  const base = useMemo(() => new Color(softHeat(p.item.temperatureC)), [p.item.temperatureC])
   const first = useRef(true)
 
   useFrame((state, dt) => {

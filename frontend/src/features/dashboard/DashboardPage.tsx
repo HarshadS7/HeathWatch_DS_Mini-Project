@@ -8,7 +8,19 @@ import { fmtDate, fmtDelta, fmtTemp, pct } from '../../lib/format'
 import { useUi } from '../../lib/store'
 import { BAND_META, BAND_ORDER } from '../../lib/bands'
 import { BandBadge, Card, ErrorState, KpiTile, PageHeader, Skeleton } from '../../components/ui'
-import { IndiaMap } from './IndiaMap'
+import { IndiaMap as IndiaMapSvg } from './IndiaMap'
+import { lazy, Suspense } from 'react'
+const IndiaMap3D = lazy(() => import('./IndiaMap3D'))
+const WEBGL = (() => { try { return !!document.createElement('canvas').getContext('webgl2') } catch { return false } })()
+function IndiaMap(p: React.ComponentProps<typeof IndiaMapSvg>) {
+  return WEBGL ? (
+    <Suspense fallback={<div className={p.className} />}>
+      <IndiaMap3D {...p} />
+    </Suspense>
+  ) : (
+    <IndiaMapSvg {...p} />
+  )
+}
 import { TrendChart } from './TrendChart'
 import { AlertsFeed } from './AlertsFeed'
 import { QueueRing2D } from './QueueRing2D'
@@ -109,7 +121,7 @@ export function DashboardPage() {
             <Skeleton className="m-5 h-[520px]" />
           ) : (
             <IndiaMap
-              className="h-[520px] px-2 pb-2 md:h-[600px]"
+              className="aspect-[56/52] w-full"
               stations={list}
               selected={stationId}
               hover={hoverStation}

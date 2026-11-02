@@ -82,6 +82,15 @@ static void hashTests() {
 static bool has(const std::string& s, const std::string& sub) { return s.find(sub) != std::string::npos; }
 
 static void protocolTests() {
+    {
+        std::string rd = R"("readings":[{"id":1,"date":20240501,"t":40},{"id":2,"date":20240502,"t":41},{"id":3,"date":20240503,"t":42},{"id":4,"date":20240504,"t":43},{"id":5,"date":20240505,"t":44},{"id":6,"date":20240506,"t":45},{"id":7,"date":20240507,"t":46}])";
+        std::string chrono = handle(R"({"id":"b1","op":"bst.demo","trace":true,"payload":{"order":"chronological","query":"search","date":20240507,)" + rd + "}}");
+        std::string bal = handle(R"({"id":"b2","op":"bst.demo","trace":true,"payload":{"order":"balanced","query":"search","date":20240507,)" + rd + "}}");
+        CHECK(has(chrono, R"("height":7)") && has(chrono, R"("comparisons":7)"));  // skewed: O(n)
+        CHECK(has(bal, R"("height":3)") && has(bal, R"("comparisons":3)"));        // balanced: O(log n)
+        std::string rng = handle(R"({"id":"b3","op":"bst.demo","trace":true,"payload":{"order":"balanced","query":"range","from":20240503,"to":20240505,)" + rd + "}}");
+        CHECK(has(rng, "prune") && has(rng, R"("emitted":3)"));
+    }
     // 4 stations: three close together (Delhi, Jaipur, Lucknow), one far (Chennai)
     std::string init = R"({"id":"1","op":"init","payload":{"queueCapacity":2,"edgeKm":450,"stations":[
         {"id":"DEL","name":"Delhi","lat":28.6,"lon":77.2},{"id":"JAI","name":"Jaipur","lat":26.9,"lon":75.8},
@@ -105,6 +114,14 @@ static void protocolTests() {
     r = handle(R"({"id":"10","op":"queue.demo","trace":true,"payload":{"capacity":2,"ops":["E","E","E","D"],"items":[{"id":"a","stationId":"DEL","temperatureC":40},{"id":"b","stationId":"JAI","temperatureC":41},{"id":"c","stationId":"LKO","temperatureC":42}]}})");
     CHECK(has(r, "\"rejected\":1") && has(r, "reject_full") && has(r, "\"dequeued\":1"));
     CHECK(has(handle(R"({"id":"11","op":"nope"})"), "\"ok\":false"));
+    r = handle(R"({"id":"12","op":"stack.eval","trace":true,"payload":{"expr":"-(t - 40) * 2 + 1","vars":{"t":45}}})");
+    CHECK(has(r, R"("value":-9)") && has(r, R"("postfix":["t","40","-","~","2","*","1","+"])"));  // unary minus + precedence
+    CHECK(has(handle(R"x({"id":"13","op":"stack.eval","payload":{"expr":"t / (1 - 1)","vars":{"t":3}}})x"), "division by zero"));
+    CHECK(has(handle(R"({"id":"14","op":"stack.eval","payload":{"expr":"(t + 1","vars":{"t":3}}})"), "\"ok\":false"));
+    CHECK(has(handle(R"({"id":"15","op":"stack.eval","payload":{"expr":"x + 1","vars":{"t":3}}})"), "unknown variable"));
+    CHECK(has(handle(R"({"id":"16","op":"stack.eval","payload":{"expr":"2 * 3 - 4 / 2","vars":{}}})"), R"("value":4)"));
+    r = handle(R"({"id":"17","op":"list.demo","trace":true,"payload":{"limit":2,"items":[{"id":1,"stationId":"DEL","date":20240501,"temperatureC":40},{"id":2,"stationId":"DEL","date":20240502,"temperatureC":41},{"id":3,"stationId":"DEL","date":20240503,"temperatureC":42}]}})");
+    CHECK(has(r, R"("evicted":1)") && has(r, R"("size":2)"));
     CHECK(has(handle("{bad json"), "\"ok\":false"));
 }
 
