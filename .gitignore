@@ -1,0 +1,67 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+.yarn/cache/
+
+# Generated frontend output and caches
+dist/
+.vite/
+.vercel/
+coverage/
+*.tsbuildinfo
+
+# Native engine builds (keep frontend/public/engine JS/WASM deployment assets)
+/engine/build/
+/engine/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.pdb
+
+# Python environments and generated caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local secrets; retain documented example settings
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Local databases and raw source grids; keep curated data/sample CSVs
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.GRD
+*.grd
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Personal editor and assistant state
+.idea/
+.vscode/
+.claude/
+.codex/
