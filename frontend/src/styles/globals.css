@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   HeatWatch design tokens
+   - Teal = interface chrome (selection, primary actions). Never used for heat.
+   - Heat bands = slate -> amber -> orange -> deep red, always paired with icon + text.
+   - Continuous temperature ramp lives in src/lib/bands.ts (YlOrRd-like, single hue family).
+   ========================================================================== */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --page: #f4f3ef;
+  --surface: #fcfcfb;
+  --surface-2: #f8f7f3;
+  --sunken: #eceae3;
+  --line: #e1e0d9;
+  --line-strong: #c9c7bd;
+  --ink: #14181b;
+  --ink-2: #4a4f52;
+  --ink-3: #82857f;
+
+  --primary: #0f766e;
+  --primary-hover: #115e59;
+  --primary-wash: #d7f2ee;
+  --primary-ink: #0b4f4a;
+
+  --band-normal: #64748b;
+  --band-watch: #e0a12f;
+  --band-heat: #d9682f;
+  --band-severe: #ad4416;
+  --band-normal-wash: #eef1f4;
+  --band-watch-wash: #fcf1dc;
+  --band-heat-wash: #fbe7dc;
+  --band-severe-wash: #f6dfd5;
+
+  --ok: #1f8a5b;
+  --danger: #c2410c;
+
+  --shadow-card: 0 1px 0 rgba(20, 24, 27, 0.03), 0 1px 2px rgba(20, 24, 27, 0.04);
+  --shadow-lift: 0 18px 40px -22px rgba(20, 24, 27, 0.35), 0 6px 14px -10px rgba(20, 24, 27, 0.18);
+  --clay: 0 22px 40px -22px rgba(20, 24, 27, 0.3), inset 0 -5px 10px -6px rgba(20, 24, 27, 0.14),
+    inset 0 7px 12px -8px rgba(255, 255, 255, 0.95);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --page: #0e1113;
+  --surface: #161a1d;
+  --surface-2: #1b2024;
+  --sunken: #111417;
+  --line: #262c31;
+  --line-strong: #39414a;
+  --ink: #eef1f3;
+  --ink-2: #b4bbc1;
+  --ink-3: #7f878e;
+
+  --primary: #2dd4bf;
+  --primary-hover: #5eead4;
+  --primary-wash: rgba(45, 212, 191, 0.12);
+  --primary-ink: #99f6e4;
+
+  --band-normal: #94a3b8;
+  --band-watch: #f2b84b;
+  --band-heat: #f08a4b;
+  --band-severe: #f2643a;
+  --band-normal-wash: rgba(148, 163, 184, 0.12);
+  --band-watch-wash: rgba(242, 184, 75, 0.13);
+  --band-heat-wash: rgba(240, 138, 75, 0.14);
+  --band-severe-wash: rgba(242, 100, 58, 0.16);
+
+  --ok: #34d399;
+  --danger: #fb923c;
+
+  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.2);
+  --shadow-lift: 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+  --clay: 0 22px 40px -22px rgba(0, 0, 0, 0.7), inset 0 -5px 10px -6px rgba(0, 0, 0, 0.5),
+    inset 0 7px 12px -8px rgba(255, 255, 255, 0.06);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-wash: var(--primary-wash);
+  --color-primary-ink: var(--primary-ink);
+  --color-band-normal: var(--band-normal);
+  --color-band-watch: var(--band-watch);
+  --color-band-heat: var(--band-heat);
+  --color-band-severe: var(--band-severe);
+  --color-ok: var(--ok);
+  --color-danger: var(--danger);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, Consolas, monospace;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-clay: var(--clay);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--sunken) 0%, var(--surface-2) 50%, var(--sunken) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* severe marker pulse on the map */
+@keyframes ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring-pulse 1.8s ease-out infinite;
+}
+
+/* thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+input[type="range"] {
+  accent-color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Structure Lab stage backdrop: cream -> pale sky room; night room in dark mode */
+.lab-stage {
+  background: radial-gradient(120% 90% at 50% 105%, rgba(239, 143, 107, 0.16), transparent 60%),
+    radial-gradient(90% 70% at 15% 0%, rgba(169, 207, 230, 0.55), transparent 60%),
+    linear-gradient(180deg, #f6f1e7 0%, #fbf7f0 55%, #f3e9da 100%);
+}
+:root[data-theme="dark"] .lab-stage {
+  background: radial-gradient(120% 90% at 50% 105%, rgba(240, 138, 75, 0.14), transparent 60%),
+    radial-gradient(90% 70% at 15% 0%, rgba(93, 112, 190, 0.35), transparent 60%),
+    linear-gradient(180deg, #151a2e 0%, #10142a 60%, #0d1022 100%);
+}

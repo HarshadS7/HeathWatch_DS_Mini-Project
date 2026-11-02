@@ -1,0 +1,17 @@
+station_id,name,latitude,longitude,grid_lat,grid_lon,source_type
+DEL,Delhi,28.61,77.21,28.5,77.5,imd_grid_cell
+JAI,Jaipur,26.91,75.79,26.5,75.5,imd_grid_cell
+JDH,Jodhpur,26.24,73.02,26.5,73.5,imd_grid_cell
+AMD,Ahmedabad,23.02,72.57,23.5,72.5,imd_grid_cell
+BOM,Mumbai,19.08,72.88,19.5,72.5,imd_grid_cell
+PNQ,Pune,18.52,73.86,18.5,73.5,imd_grid_cell
+NAG,Nagpur,21.15,79.09,21.5,79.5,imd_grid_cell
+BHO,Bhopal,23.26,77.41,23.5,77.5,imd_grid_cell
+LKO,Lucknow,26.85,80.95,26.5,80.5,imd_grid_cell
+PAT,Patna,25.59,85.14,25.5,85.5,imd_grid_cell
+CCU,Kolkata,22.57,88.36,22.5,88.5,imd_grid_cell
+BBI,Bhubaneswar,20.3,85.82,20.5,85.5,imd_grid_cell
+HYD,Hyderabad,17.39,78.49,17.5,78.5,imd_grid_cell
+MAA,Chennai,13.08,80.27,13.5,80.5,imd_grid_cell
+BLR,Bengaluru,12.97,77.59,12.5,77.5,imd_grid_cell
+PRY,Prayagraj,25.44,81.85,25.5,81.5,imd_grid_cell
