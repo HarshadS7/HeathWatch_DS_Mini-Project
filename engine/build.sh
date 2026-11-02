@@ -8,9 +8,11 @@ g++ -std=c++17 -O1 -Wall -Wextra -Iinclude src/engine.cpp tests/tests.cpp -o bui
 if command -v em++ >/dev/null; then
   out=../frontend/public/engine
   mkdir -p "$out"
-  em++ -std=c++17 -O2 -Iinclude src/engine.cpp src/wasm.cpp -o "$out/heatwatch.js" \
+  # -fexceptions: the engine reports bad input by throwing (caught in handle()); without it a throw aborts the module.
+  # The worker passes requests through malloc'd memory: ccall's 64 KB stack copy overflows on large rebuild requests.
+  em++ -std=c++17 -O2 -fexceptions -Iinclude src/engine.cpp src/wasm.cpp -o "$out/heatwatch.js" \
     -sMODULARIZE -sEXPORT_ES6 -sENVIRONMENT=worker -sALLOW_MEMORY_GROWTH \
-    -sEXPORTED_FUNCTIONS=_hw_handle -sEXPORTED_RUNTIME_METHODS=ccall
+    -sEXPORTED_FUNCTIONS=_hw_handle,_malloc,_free -sEXPORTED_RUNTIME_METHODS=UTF8ToString,stringToUTF8,lengthBytesUTF8
   echo "WASM -> $out"
 else
   echo "em++ not found: activate emsdk (emsdk_env) to build the WebAssembly engine"

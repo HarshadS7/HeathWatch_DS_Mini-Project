@@ -50,6 +50,7 @@ async function initEngine() {
   const rows = [...obs.values()].flat().sort((a, b) => (a.observedAt < b.observedAt ? -1 : a.observedAt > b.observedAt ? 1 : a.id - b.id))
   if (rows.length)
     await call('rebuild', { obs: rows.map((o) => ({ id: o.id, station: o.stationId, date: dateInt(o.observedAt), t: o.temperatureC })) })
+  stats = (await call<{ stats: typeof stats }>('queue.state')).result.stats // show the engine's counters straight after a reload
 }
 
 export const ready: Promise<void> = (async () => {
